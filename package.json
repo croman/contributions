@@ -1,0 +1,26 @@
+{
+  "name": "contributions",
+  "version": "0.0.1",
+  "description": "Create fake Github contributions",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/croman/contributions.git"
+  },
+  "keywords": [
+    "github",
+    "contributions"
+  ],
+  "author": "Ciprian Ionut Roman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/croman/contributions/issues"
+  },
+  "homepage": "https://github.com/croman/contributions",
+  "devDependencies": {
+    "eslint": "^1.10.3"
+  },
+  "dependencies": {
+    "debug": "^2.2.0"
+  }
+}
