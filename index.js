@@ -6,12 +6,14 @@ let fs = require("fs");
 let path = require("path");
 
 let debug = require("debug")("contributions:main");
+let moment = require("moment");
 
 let github = require("./lib/github");
 let git = require("./lib/git");
+let fonts = require("./lib/fonts");
 
 const DEFAULT_REPOSITORY_NAME = "fake-contributions";
-const DEFAULT_FONT = "height5";
+const DEFAULT_FONT = "height7";
 
 main();
 
@@ -65,7 +67,17 @@ function main() {
     }
   )
   .then(git.clone.bind(null, config.github))
-  .then(git.commit.bind(null, config.github))
+  .then(() => {
+    let fontDefinition = fonts.readFile(config.font);
+    let dates = fonts.generateCommitDates(fontDefinition[config.message], moment().subtract(1, "years").add(7, "days").day("Sunday"));
+
+    let commitPromises = [];
+    for (let i = 0; i < dates.length; i++) {
+      commitPromises.push(git.commit.bind(null, config.github, dates[i]));
+    }
+
+    return commitPromises.reduce((p, fn) => p.then(fn), Promise.resolve());
+  })
   .then(git.push.bind(null, config.github))
   .catch(err => logAndExit(`Error performing operations: ${err}`));
 }
@@ -87,6 +99,7 @@ function getConfig() {
 
   return {
     message: message,
+    font: font,
     github: getGithubConfig()
   };
 }
