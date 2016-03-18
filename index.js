@@ -64,7 +64,10 @@ function main() {
       );
     }
   )
-  .then(git.clone.bind(null, config.github));
+  .then(git.clone.bind(null, config.github))
+  .then(git.commit.bind(null, config.github))
+  .then(git.push.bind(null, config.github))
+  .catch(err => logAndExit(`Error performing operations: ${err}`));
 }
 
 function getConfig() {
@@ -120,7 +123,8 @@ function getGithubConfig() {
     user: user,
     password: password,
     token: token,
-    usePrivateRepository: usePrivateRepository
+    usePrivateRepository: usePrivateRepository,
+    path: path.join(__dirname, "..", repository)
   };
 }
 
