@@ -23,12 +23,44 @@ function main() {
     process.exit(1);
   }
 
-  github.repository.get(config.github).then(
-    results => {
-      debug(results);
+  github.repository.get(config.github)
+  .then(
+    response => {
+      if (response.statusCode === 200) {
+        debug(`Repository '${config.github.repository}' already exists, no need to create it`);
+        return Promise.resolve(true);
+      }
+
+      if (response.statusCode === 404) {
+        debug(`Repository '${config.github.repository}' doesn't exist, we'll have to create it`);
+        return Promise.resolve(false);
+      }
+
+      logAndExit(`Invalid response received from Github API: ${response.data.message}`);
     },
     err => {
-      debug(err);
+      logAndExit(err);
+    }
+  )
+  .then(
+    repositoryExists => {
+      if (repositoryExists) {
+        return Promise.resolve();
+      }
+
+      return github.repository.create(config.github).then(
+        response => {
+          if (response.statusCode === 201) {
+            debug(`Repository '${config.github.repository}' was successfully created`);
+            return Promise.resolve();
+          }
+
+          logAndExit(`Invalid response received from Github API: ${JSON.stringify(response.data)}`);
+        },
+        err => {
+          logAndExit(err);
+        }
+      );
     }
   );
 }
@@ -56,18 +88,19 @@ function getConfig() {
 
 function getGithubConfig() {
   let organisation = process.env.GITHUB_ORGANISATION;
+  let user = process.env.GITHUB_USER;
+
+  if (!organisation && !user) {
+    throw new Error("You need to specify at least one of GITHUB_ORGANISATION or GITHUB_USER");
+  }
+
   if (!organisation) {
-    throw new Error("Variable GITHUB_ORGANISATION is missing");
+    organisation = user;
   }
 
   let repository = process.env.GITHUB_CONTRIBUTIONS_REPOSITORY;
   if (!repository) {
     repository = DEFAULT_REPOSITORY_NAME;
-  }
-
-  let user = process.env.GITHUB_USER;
-  if (!user) {
-    user = organisation;
   }
 
   let password = process.env.GITHUB_PASSWORD;
@@ -77,12 +110,15 @@ function getGithubConfig() {
     throw new Error("You need to specify at least one authentication method (GITHUB_PASSWORD or GITHUB_TOKEN)");
   }
 
+  let usePrivateRepository = process.env.GITHUB_REPOSITORY_TYPE === "private";
+
   return {
     organisation: organisation,
     repository: repository,
     user: user,
     password: password,
-    token: token
+    token: token,
+    usePrivateRepository: usePrivateRepository
   };
 }
 
@@ -97,4 +133,9 @@ function validateFont(font) {
   }
 
   return true;
+}
+
+function logAndExit(err) {
+  debug(err);
+  process.exit(1);
 }
