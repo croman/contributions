@@ -8,6 +8,7 @@ let path = require("path");
 let debug = require("debug")("contributions:main");
 
 let github = require("./lib/github");
+let git = require("./lib/git");
 
 const DEFAULT_REPOSITORY_NAME = "fake-contributions";
 const DEFAULT_FONT = "height5";
@@ -62,7 +63,8 @@ function main() {
         }
       );
     }
-  );
+  )
+  .then(git.clone.bind(null, config.github));
 }
 
 function getConfig() {
