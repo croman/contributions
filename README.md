@@ -1,29 +1,27 @@
 [![MIT License][license-image]][license-url]
 
-# Create fake Github contributions
-
-Most of my Github contributions are on private repositories or they weren't considered (this is [how Gihub counts
-contributions](https://help.github.com/articles/why-are-my-contributions-not-showing-up-on-my-profile).
-
-So I thought it would be fun to make my visitors feeling welcome when they visit my profile page.
+## Create fake Github contributions
 
 ![Contribution message](https://github.com/croman/contributions/raw/master/images/message.png)
 
-## How it works
+Most of my Github contributions are on private repositories or they weren't considered (this is [how Gihub counts
+contributions](https://help.github.com/articles/why-are-my-contributions-not-showing-up-on-my-profile). So I thought it would be fun to make my visitors feeling welcome when they visit my profile page.
+
+### How it works
 
 The application creates a public repository and the necessary commits associated with the message you want to be
 displayed. Your other contributions will still be visible and could interfere with the message (how much depends on the
 message and your public activity).
 
-### OAuth token
+#### OAuth token
 
 The application needs an [OAuth](https://developer.github.com/v3/oauth/) token to create the repository and push the
 commits. The only [scope](https://developer.github.com/v3/oauth/#scopes) required is `public_repo`. To create a token
-go to the [token setting](https://github.com/settings/tokens/new) page in your Github account.
+go to the [token settings](https://github.com/settings/tokens/new) page in your Github account.
 
 Keep the generated token in a safe place!
 
-### Generate message
+#### Generate message
 
 ```bash
 npm install;
@@ -36,7 +34,7 @@ cloned this repository), create and push the commits. To reset the contributions
 You can override the default repository name by passing `GITHUB_CONTRIBUTIONS_REPOSITORY=<repo-name>` to the above
 command.
 
-### Messages and fonts
+#### Messages and fonts
 
 The characters accepted in the message must be defined in the used font. All fonts are located in the `fonts` folder.
 You can override the default font (height7) by passing the `FONT=<font-name>` to the command.
