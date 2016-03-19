@@ -6,11 +6,11 @@ let fs = require("fs");
 let path = require("path");
 
 let debug = require("debug")("contributions:main");
-let moment = require("moment");
 
 let github = require("./lib/github");
 let git = require("./lib/git");
 let fonts = require("./lib/fonts");
+let messages = require("./lib/messages");
 
 const DEFAULT_REPOSITORY_NAME = "fake-contributions";
 const DEFAULT_FONT = "height7";
@@ -69,11 +69,16 @@ function main() {
   .then(git.clone.bind(null, config.github))
   .then(() => {
     let fontDefinition = fonts.readFile(config.font);
-    let dates = fonts.generateCommitDates(fontDefinition[config.message], moment().subtract(1, "years").add(7, "days").day("Sunday"));
+    let characterDates = messages.getCharactersStartDates(fontDefinition, config.message);
 
     let commitPromises = [];
-    for (let i = 0; i < dates.length; i++) {
-      commitPromises.push(git.commit.bind(null, config.github, dates[i]));
+
+    for (let i = 0; i < characterDates.length; i++) {
+      let dates = fonts.generateCommitDates(fontDefinition[characterDates[i].character], characterDates[i].date);
+
+      for (let j = 0; j < dates.length; j++) {
+        commitPromises.push(git.commit.bind(null, config.github, dates[j]));
+      }
     }
 
     return commitPromises.reduce((p, fn) => p.then(fn), Promise.resolve());
