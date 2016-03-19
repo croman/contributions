@@ -73,8 +73,8 @@ function main() {
     let commitPromises = [];
 
     for (let i = 0; i < characterDates.length; i++) {
-      let matrix = fontDefinition[characterDates[i].character].matrix;
-      let dates = fonts.generateCommitDates(matrix, characterDates[i].date);
+      let characterDefinition = fontDefinition[characterDates[i].character];
+      let dates = fonts.generateCommitDates(characterDefinition, characterDates[i].date);
 
       for (let j = 0; j < dates.length; j++) {
         commitPromises.push(git.commit.bind(null, config.github, dates[j]));
