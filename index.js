@@ -2,7 +2,6 @@
 
 /* eslint-disable no-process-exit,no-process-env */
 
-let fs = require("fs");
 let path = require("path");
 
 let debug = require("debug")("contributions:main");
@@ -68,13 +67,14 @@ function main() {
   )
   .then(git.clone.bind(null, config.github))
   .then(() => {
-    let fontDefinition = fonts.readFile(config.font);
+    let fontDefinition = fonts.read(config.font);
     let characterDates = messages.getCharactersStartDates(fontDefinition, config.message);
 
     let commitPromises = [];
 
     for (let i = 0; i < characterDates.length; i++) {
-      let dates = fonts.generateCommitDates(fontDefinition[characterDates[i].character], characterDates[i].date);
+      let matrix = fontDefinition[characterDates[i].character].matrix;
+      let dates = fonts.generateCommitDates(matrix, characterDates[i].date);
 
       for (let j = 0; j < dates.length; j++) {
         commitPromises.push(git.commit.bind(null, config.github, dates[j]));
@@ -96,10 +96,6 @@ function getConfig() {
   let font = process.env.FONT;
   if (!font) {
     font = DEFAULT_FONT;
-  }
-
-  if (!validateFont(font)) {
-    throw new Error(`Invalid font ${font}`);
   }
 
   return {
@@ -144,19 +140,6 @@ function getGithubConfig() {
     usePrivateRepository: usePrivateRepository,
     path: path.join(__dirname, "..", repository)
   };
-}
-
-function validateFont(font) {
-  try {
-    let stat = fs.statSync(path.join(__dirname, "fonts", font));
-    if (!stat.isFile()) {
-      return false;
-    }
-  } catch (err) {
-    return false;
-  }
-
-  return true;
 }
 
 function logAndExit(err) {
